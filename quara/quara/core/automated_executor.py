@@ -418,12 +418,11 @@ Format as JSON with keys: hypothesis, data_sources, methods, outputs, key_insigh
             "web_context": []
         }
         
-        # Extract grounding context from plan
+        # Extract FULL grounding context from plan
         grounding_context = plan.get("grounding_context", "")
-        grounding_summary = grounding_context[:500] if grounding_context else "No grounding context available"
         
         if self.debug_mode:
-            self.logger.debug(f"Using grounding context for data collection (length: {len(grounding_context)} chars)")
+            self.logger.debug(f"Using FULL grounding context for data collection (length: {len(grounding_context)} chars)")
         
         # Stage 1: Additional search for data sources with grounding context
         self.logger.info("🔍 Searching for specific data sources...")
@@ -443,11 +442,11 @@ Format as JSON with keys: hypothesis, data_sources, methods, outputs, key_insigh
         if data_search["success"]:
             results["web_context"] = data_search["results"]
             
-            # Save search results with grounding context reference
+            # Save search results with FULL grounding context reference
             self.file_saver.base_dir = project_dir
             data_context = {
                 "search_results": data_search,
-                "grounding_context_summary": grounding_summary,
+                "grounding_context_full": grounding_context,
                 "timestamp": datetime.now().isoformat()
             }
             await self.file_saver.save_json(
@@ -520,21 +519,22 @@ Format as JSON with keys: hypothesis, data_sources, methods, outputs, key_insigh
                                             data_results: Dict,
                                             project_dir: Path,
                                             grounding_context: str = "") -> Dict[str, Any]:
-        """Generate analysis code and execute it with grounding context"""
+        """Generate analysis code and execute it with FULL grounding context"""
         
-        # Prepare grounding context summary
-        grounding_summary = grounding_context[:800] if grounding_context else "No grounding context available"
+        # Use FULL grounding context (no truncation)
+        if self.debug_mode:
+            self.logger.debug(f"Using FULL grounding context for analysis: {len(grounding_context)} chars")
         
         # Generate analysis code
         current_datetime = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         code_prompt = f"""Current Date and Time: {current_datetime}
 
-Generate Python code to analyze this research question with grounding context.
+Generate Python code to analyze this research question with FULL grounding context.
 
 Research Question: {question}
 
-Grounding Context (Key Insights):
-{grounding_summary}
+Grounding Context (Complete):
+{grounding_context}
 
 Available data files:
 {json.dumps(data_results.get('datasets', {}), indent=2)}
@@ -548,11 +548,11 @@ Requirements:
 Use pandas, numpy, scipy. Write complete, executable code with error handling.
 Save all results to files in the current directory."""
         
-        self.logger.info("Generating analysis code with grounding context...")
+        self.logger.info("Generating analysis code with FULL grounding context...")
         if self.debug_mode:
             self.logger.debug(f"Analysis code prompt length: {len(code_prompt)} chars")
             self.logger.debug(f"Prompt excerpt:\n{code_prompt[:400]}...")
-            self.logger.debug(f"Grounding context included: {len(grounding_summary)} chars")
+            self.logger.debug(f"FULL grounding context included: {len(grounding_context)} chars")
             self.logger.debug(f"Current date/time: {current_datetime}")
         
         code = await self.llm_client.generate_code(
@@ -631,12 +631,13 @@ Save all results to files in the current directory."""
                                       analysis_results: Dict,
                                       project_dir: Path,
                                       grounding_context: str = "") -> Dict[str, Any]:
-        """Generate visualizations from analysis using LLM code generation with grounding context"""
+        """Generate visualizations from analysis using LLM code generation with FULL grounding context"""
         
         viz_results = {"plots": []}
         
-        # Prepare grounding context summary
-        grounding_summary = grounding_context[:600] if grounding_context else "No grounding context available"
+        # Use FULL grounding context (no truncation)
+        if self.debug_mode:
+            self.logger.debug(f"Using FULL grounding context for visualizations: {len(grounding_context)} chars")
         
         # First, probe the file structure to understand available data
         self.logger.info("🔍 Probing data files for visualization context...")
@@ -720,14 +721,14 @@ print(json.dumps(result, indent=2, default=str))
                     self.logger.debug("Failed to load analysis code file")
                 pass
         
-        # Generate visualization code with LLM using full context
+        # Generate visualization code with LLM using FULL context
         current_datetime = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         viz_prompt = f"""Current Date and Time: {current_datetime}
 
 Generate Python code for creating comprehensive visualizations of financial data.
 
-GROUNDING CONTEXT:
-{grounding_summary}
+GROUNDING CONTEXT (Complete):
+{grounding_context}
 
 ANALYSIS CONTEXT:
 - Analysis Results: {analysis_results.get('execution', {}).get('output', 'N/A')[:500]}
@@ -898,17 +899,15 @@ Generate complete, working code following this pattern for all tickers in the da
                               artifacts: Dict,
                               project_dir: Path,
                               grounding_context: str = "") -> Dict[str, Any]:
-        """Generate research report with grounding context"""
+        """Generate research report with FULL grounding context"""
         
-        # Prepare grounding context summary
-        grounding_summary = grounding_context[:1000] if grounding_context else "No grounding context available"
-        
+        # Use FULL grounding context (no truncation)
         if self.debug_mode:
-            self.logger.debug("Generating research report with grounding context...")
+            self.logger.debug("Generating research report with FULL grounding context...")
             self.logger.debug(f"Number of datasets: {len(artifacts['stages']['data_collection'].get('datasets', {}))}")
             self.logger.debug(f"Analysis success: {artifacts['stages']['analysis']['execution']['success']}")
             self.logger.debug(f"Number of plots: {len(artifacts['stages']['visualizations'].get('plots', []))}")
-            self.logger.debug(f"Grounding context: {len(grounding_context)} chars")
+            self.logger.debug(f"FULL grounding context: {len(grounding_context)} chars")
         
         current_datetime = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         report_prompt = f"""Current Date and Time: {current_datetime}
@@ -917,8 +916,8 @@ Generate a comprehensive research report grounded in the web search context.
 
 Research Question: {question}
 
-Grounding Context (Web Search Insights):
-{grounding_summary}
+Grounding Context (Complete Web Search Insights):
+{grounding_context}
 
 Project Summary:
 - Data collected: {len(artifacts['stages']['data_collection'].get('datasets', {}))} datasets
@@ -973,12 +972,13 @@ Format in Markdown with proper sections and citations to sources from grounding 
                                                data_results: Dict,
                                                project_dir: Path,
                                                grounding_context: str = "") -> Dict[str, Any]:
-        """Generate comprehensive visualizations for each report section using LLM with grounding context"""
+        """Generate comprehensive visualizations for each report section using LLM with FULL grounding context"""
         
-        # Prepare grounding context summary
-        grounding_summary = grounding_context[:800] if grounding_context else "No grounding context available"
+        # Use FULL grounding context (no truncation)
+        if self.debug_mode:
+            self.logger.debug(f"Using FULL grounding context for section visualizations: {len(grounding_context)} chars")
         
-        self.logger.info("📊 Analyzing report and generating section-specific visualizations with grounding context...")
+        self.logger.info("📊 Analyzing report and generating section-specific visualizations with FULL grounding context...")
         
         if self.debug_mode:
             self.logger.debug(f"Section viz project dir: {project_dir}")
@@ -1049,14 +1049,14 @@ print(json.dumps(result, indent=2, default=str))
                 if self.debug_mode:
                     self.logger.debug("Failed to parse data structure as JSON")
         
-        # Generate comprehensive visualization code with full context
+        # Generate comprehensive visualization code with FULL context
         current_datetime = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         section_viz_prompt = f"""Current Date and Time: {current_datetime}
 
 Generate Python code for creating comprehensive section-specific visualizations for a research report.
 
-GROUNDING CONTEXT (Web Search Insights):
-{grounding_summary}
+GROUNDING CONTEXT (Complete Web Search Insights):
+{grounding_context}
 
 RESEARCH CONTEXT:
 Question: {question}
