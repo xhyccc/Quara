@@ -155,3 +155,8 @@ models/
 
 # System Files
 .Trash-*/
+
+# reports
+*.csv
+*.png
+*.md
