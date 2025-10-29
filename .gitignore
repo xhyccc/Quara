@@ -1,0 +1,157 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual Environment
+.venv/
+venv/
+ENV/
+env/
+.virtualenv
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Environment Variables
+.env
+.env.local
+.env.*.local
+
+# Jupyter Notebook
+.ipynb_checkpoints
+*.ipynb
+
+# Research Data & Cache
+data_cache/
+*.csv
+*.parquet
+*.feather
+*.h5
+*.hdf5
+
+# Research Projects (generated outputs)
+research_projects/
+!research_projects/.gitkeep
+
+# Visualizations (generated)
+visualizations/
+*.png
+*.jpg
+*.jpeg
+*.pdf
+*.svg
+
+# Generated Code Files (now executed dynamically, but keep pattern)
+*_code.py
+visualization_code.py
+section_visualizations.py
+analysis_code.py
+
+# Reports
+*.md
+!README.md
+!QUICKSTART.md
+!CHANGES.md
+!IMPLEMENTATION_SUMMARY.md
+!LLM_CONFIGURATION.md
+!CLI_GUIDE.md
+!CLI_QUICK_REFERENCE.md
+!AUTOMATED_RESEARCH_GUIDE.md
+!DEBUG_LOGGING.md
+!design_spec.md
+
+# Logs
+*.log
+logs/
+debug.log
+
+# Test Coverage
+htmlcov/
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+.pytest_cache/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Temporary Files
+*.tmp
+*.temp
+tmp/
+temp/
+
+# API Keys & Secrets (extra safety)
+*.key
+*.pem
+*.cert
+secrets/
+credentials.json
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Backup Files
+*.bak
+*.backup
+*~
+
+# Large Model Files
+*.bin
+*.onnx
+*.pt
+*.pth
+models/
+
+# System Files
+.Trash-*/
